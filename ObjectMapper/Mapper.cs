@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using ObjectMapper.Attributes;
 
 namespace ObjectMapper;
 
@@ -23,21 +24,22 @@ public static class Mapper
 
         foreach (var prop in targetProperties)
         {
-            if (prop.CanWrite)
+            // Check for MapFromAttribute
+            var mapFromAttr = prop.GetCustomAttribute<MapFromAttribute>();
+            var sourcePropName = mapFromAttr?.SourcePropertyName ?? prop.Name;
+            
+            if (prop.CanWrite && sourcePropertiesDict.TryGetValue(sourcePropName, out var sourceProp) && sourceProp.CanRead)
             {
-                if (sourcePropertiesDict.TryGetValue(prop.Name, out var sourceProp) && sourceProp.CanRead)
+                var value = sourceProp.GetValue(source);
+                if (value is not null && prop.PropertyType.IsAssignableFrom(sourceProp.PropertyType))
                 {
-                    var value = sourceProp.GetValue(source);
-                    if (value is not null && prop.PropertyType.IsAssignableFrom(sourceProp.PropertyType))
-                    {
-                        prop.SetValue(target, value);
-                    }
-                    else if (value is null && !prop.PropertyType.IsValueType)
-                    {
-                        prop.SetValue(target, null);
-                    }
-                    // Optionally, handle type conversion or ignore incompatible types
+                    prop.SetValue(target, value);
                 }
+                else if (value is null && !prop.PropertyType.IsValueType)
+                {
+                    prop.SetValue(target, null);
+                }
+                // Optionally, handle type conversion or ignore incompatible types
             }
         }
         return target;
