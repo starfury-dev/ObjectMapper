@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+[MapFrom(nameof(CatEntity))]
 public class CatDto
 {
     public int Id { get; set; }

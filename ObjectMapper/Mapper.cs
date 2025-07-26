@@ -12,6 +12,10 @@ public static class Mapper
             throw new ArgumentNullException(nameof(source), $"{nameof(source)} cannot be null");
         }
 
+		var targetType = typeof(T2);
+		_ = targetType.GetCustomAttribute<MapFromAttribute>()
+			?? throw new InvalidOperationException($"Target type {targetType.Name} must have an MapFrom attribute.");
+
 		var target = MapObject<T1, T2>(source);
         
         return target;
@@ -21,7 +25,7 @@ public static class Mapper
     {
 		var sourceType = typeof(T1);
 		var targetType = typeof(T2);
-
+		
 		var target = new T2();
 
 		var targetProperties = targetType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
@@ -39,6 +43,11 @@ public static class Mapper
 				if (prop.CanWrite && sourcePropertiesDict.TryGetValue(sourcePropNameForUsing, out var sourcePropForUsing) && sourcePropForUsing.CanRead)
 				{
 					var value = sourcePropForUsing.GetValue(source);
+					if (value is null)
+					{
+						prop.SetValue(target, null);
+						continue;
+					}
 					var converterMethod = mapFromUsingAttr.ConverterType.GetMethod(mapFromUsingAttr.ConverterMethodName, BindingFlags.Public | BindingFlags.Static);
 					if (converterMethod is not null)
 					{

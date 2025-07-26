@@ -1,6 +1,6 @@
 ﻿namespace ObjectMapper.Attributes;
 
-[AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
+[AttributeUsage(AttributeTargets.Property | AttributeTargets.Class, AllowMultiple = false)]
 public class MapFromAttribute : Attribute
 {
     public string SourcePropertyName { get; }
