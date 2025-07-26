@@ -53,4 +53,14 @@ public class UnitTest1
         Assert.IsType<CatDto>(catDto);
         Assert.Equal(catEntity1.Teeth, catDto.NoofTeeth);
     }
+
+    [Fact]
+    public void MapCatEntityWithBirthDateToCatDto_MapsAgePropertyUsingConverter()
+    {
+        var catEntity1 = new CatEntity(1, "Whiskers", "Siamese", new DateTime(2020, 1, 1), "Brown", true);
+        var catDto = Mapper.Map<CatEntity, CatDto>(catEntity1);
+        Assert.NotNull(catDto);
+        Assert.IsType<CatDto>(catDto);
+        Assert.Equal(DateTime.Now.Year - catEntity1.BirthDate.Year, catDto.Age);
+    }
 }

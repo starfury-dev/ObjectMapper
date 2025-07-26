@@ -18,4 +18,7 @@ public class CatDto
 
     [MapFrom(nameof(CatEntity.Teeth))]
     public int NoofTeeth { get; set; }
+
+    [MapFromUsing(typeof(CatConverters), nameof(CatConverters.ConvertToAge), nameof(CatEntity.BirthDate))]
+    public int Age { get; set; }
 }
