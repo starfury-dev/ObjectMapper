@@ -31,7 +31,28 @@ public static class Mapper
 
 		foreach (var prop in targetProperties)
 		{
+			// Check for MapFromUsingAttribute
+			var mapFromUsingAttr = prop.GetCustomAttribute<MapFromUsingAttribute>();
+			if (mapFromUsingAttr is not null)
+			{
+				var sourcePropNameForUsing = mapFromUsingAttr.SourcePropertyName ?? prop.Name;
+				if (prop.CanWrite && sourcePropertiesDict.TryGetValue(sourcePropNameForUsing, out var sourcePropForUsing) && sourcePropForUsing.CanRead)
+				{
+					var value = sourcePropForUsing.GetValue(source);
+					var converterMethod = mapFromUsingAttr.ConverterType.GetMethod(mapFromUsingAttr.ConverterMethodName, BindingFlags.Public | BindingFlags.Static);
+					if (converterMethod is not null)
+					{
+						var convertedValue = converterMethod.Invoke(null, [value]);
+						prop.SetValue(target, convertedValue);
+					}
+				}
+				continue;
+			}
+
+			// Check for MapFromAttribute
 			var mapFromAttr = prop.GetCustomAttribute<MapFromAttribute>();
+			
+			// Create source prop name based on MapFromAttribute or default to property name
 			var sourcePropName = mapFromAttr?.SourcePropertyName ?? prop.Name;
 
 			// Check if prop is a class (excluding string and value types)
@@ -58,39 +79,21 @@ public static class Mapper
 				}
 				continue;
 			}
-
-			// Check for MapFromUsingAttribute
-			var mapFromUsingAttr = prop.GetCustomAttribute<MapFromUsingAttribute>();
-			if (mapFromUsingAttr is not null)
+			else
 			{
-				var sourcePropNameForUsing = mapFromUsingAttr.SourcePropertyName ?? prop.Name;
-				if (prop.CanWrite && sourcePropertiesDict.TryGetValue(sourcePropNameForUsing, out var sourcePropForUsing) && sourcePropForUsing.CanRead)
+				// basic property mapping for primitive types and strings
+				if (prop.CanWrite && sourcePropertiesDict.TryGetValue(sourcePropName, out var sourceProp) && sourceProp.CanRead)
 				{
-					var value = sourcePropForUsing.GetValue(source);
-					var converterMethod = mapFromUsingAttr.ConverterType.GetMethod(mapFromUsingAttr.ConverterMethodName, BindingFlags.Public | BindingFlags.Static);
-					if (converterMethod is not null)
+					var value = sourceProp.GetValue(source);
+					if (value is not null && prop.PropertyType.IsAssignableFrom(sourceProp.PropertyType))
 					{
-						var convertedValue = converterMethod.Invoke(null, [value]);
-						prop.SetValue(target, convertedValue);
+						prop.SetValue(target, value);
+					}
+					else if (value is null && !prop.PropertyType.IsValueType)
+					{
+						prop.SetValue(target, null);
 					}
 				}
-				continue;
-			}
-
-
-			// Check for MapFromAttribute
-			if (prop.CanWrite && sourcePropertiesDict.TryGetValue(sourcePropName, out var sourceProp) && sourceProp.CanRead)
-			{
-				var value = sourceProp.GetValue(source);
-				if (value is not null && prop.PropertyType.IsAssignableFrom(sourceProp.PropertyType))
-				{
-					prop.SetValue(target, value);
-				}
-				else if (value is null && !prop.PropertyType.IsValueType)
-				{
-					prop.SetValue(target, null);
-				}
-				// Optionally, handle type conversion or ignore incompatible types
 			}
 		}
 		return target;
