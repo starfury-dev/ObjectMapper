@@ -21,4 +21,7 @@ public class CatDto
 
     [MapFromUsing(typeof(CatConverters), nameof(CatConverters.ConvertToAge), nameof(CatEntity.BirthDate))]
     public int Age { get; set; }
+    
+    [MapFromUsing(typeof(CatConverters), nameof(CatConverters.ConvertToCatFood), nameof(CatEntity.Food))]
+	public CatFood Snack { get; set; } = default!;
 }

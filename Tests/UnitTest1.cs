@@ -63,4 +63,24 @@ public class UnitTest1
         Assert.IsType<CatDto>(catDto);
         Assert.Equal(DateTime.Now.Year - catEntity1.BirthDate.Year, catDto.Age);
     }
+
+    [Fact]
+    public void MapCatEntityWithFoodToCatDto_MapsSnackPropertyUsingConverter()
+    {
+		var catEntity1 = new CatEntity(1, "Whiskers", "Siamese", new DateTime(2020, 1, 1), "Brown", true)
+		{
+			Food = new CatFood()
+			{
+				FoodType = "Wet",
+				Quantity = 10
+			}
+		};
+
+		var catDto = Mapper.Map<CatEntity, CatDto>(catEntity1);
+        Assert.NotNull(catDto);
+        Assert.IsType<CatDto>(catDto);
+        Assert.NotNull(catDto.Snack);
+        Assert.Equal(catEntity1.Food.FoodType, catDto.Snack.FoodType);
+        Assert.Equal(catEntity1.Food.Quantity, catDto.Snack.Quantity);
+	}
 }
