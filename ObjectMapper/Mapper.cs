@@ -21,8 +21,13 @@ public static class Mapper
 		}
 
 		var targetType = typeof(T2);
-		_ = targetType.GetCustomAttribute<MapFromAttribute>()
+		var mapFromAttr = targetType.GetCustomAttribute<MapFromAttribute>()
 			?? throw new InvalidOperationException($"Target type {targetType.Name} must have a MapFrom attribute.");
+
+		if (mapFromAttr.SourcePropertyName != source.GetType().Name)
+		{
+			throw new InvalidOperationException($"Source type {source.GetType().Name} does not match the expected source type {mapFromAttr.SourcePropertyName}.");
+		}
 
 		var target = MapObject<T1, T2>(source);
 
