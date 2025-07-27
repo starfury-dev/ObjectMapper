@@ -5,27 +5,43 @@ namespace ObjectMapper;
 
 public static class Mapper
 {
+	/// <summary>
+	/// Maps an object of type T1 to an object of type T2.
+	/// This method uses reflection to map properties from the source object to the target object.
+	/// </summary>
+	/// <typeparam name="T1">Source type</typeparam>
+	/// <typeparam name="T2">Target type</typeparam>
+	/// <param name="source">Source object</param>
+	/// <returns>Mapped target object</returns>
     public static T2 Map<T1, T2>(T1 source) where T2 : class, new()
-    {
-        if (source is null)
-        {
-            throw new ArgumentNullException(nameof(source), $"{nameof(source)} cannot be null");
-        }
+	{
+		if (source is null)
+		{
+			throw new ArgumentNullException(nameof(source), $"{nameof(source)} cannot be null");
+		}
 
 		var targetType = typeof(T2);
 		_ = targetType.GetCustomAttribute<MapFromAttribute>()
-			?? throw new InvalidOperationException($"Target type {targetType.Name} must have an MapFrom attribute.");
+			?? throw new InvalidOperationException($"Target type {targetType.Name} must have a MapFrom attribute.");
 
 		var target = MapObject<T1, T2>(source);
-        
-        return target;
-    }
 
-    private static T2 MapObject<T1, T2>(T1 source) where T2 : class, new()
-    {
+		return target;
+	}
+
+	/// <summary>
+	/// Maps an object of type T1 to an object of type T2.
+	/// This method uses reflection to map properties from the source object to the target object.
+	/// </summary>
+	/// <typeparam name="T1">Source type</typeparam>
+	/// <typeparam name="T2">Target type</typeparam>
+	/// <param name="source">Source object</param>
+	/// <returns>Mapped target object</returns>
+	private static T2 MapObject<T1, T2>(T1 source) where T2 : class, new()
+	{
 		var sourceType = typeof(T1);
 		var targetType = typeof(T2);
-		
+
 		var target = new T2();
 
 		var targetProperties = targetType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
@@ -60,7 +76,7 @@ public static class Mapper
 
 			// Check for MapFromAttribute
 			var mapFromAttr = prop.GetCustomAttribute<MapFromAttribute>();
-			
+
 			// Create source prop name based on MapFromAttribute or default to property name
 			var sourcePropName = mapFromAttr?.SourcePropertyName ?? prop.Name;
 
