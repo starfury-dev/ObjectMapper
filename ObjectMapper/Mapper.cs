@@ -67,8 +67,16 @@ public static class Mapper
 					var converterMethod = mapFromUsingAttr.ConverterType.GetMethod(mapFromUsingAttr.ConverterMethodName, BindingFlags.Public | BindingFlags.Static);
 					if (converterMethod is not null)
 					{
-						var convertedValue = converterMethod.Invoke(null, [value]);
-						prop.SetValue(target, convertedValue);
+						var parameters = converterMethod.GetParameters();
+						if (parameters.Length == 1 && parameters[0].ParameterType.IsAssignableFrom(sourcePropForUsing.PropertyType))
+						{
+							var convertedValue = converterMethod.Invoke(null, [value]);
+							prop.SetValue(target, convertedValue);
+						}
+						else
+						{
+							throw new InvalidOperationException($"Converter method '{mapFromUsingAttr.ConverterMethodName}' in '{mapFromUsingAttr.ConverterType.Name}' must accept a single parameter of type '{sourcePropForUsing.PropertyType.Name}'.");
+						}
 					}
 				}
 				continue;
@@ -110,13 +118,13 @@ public static class Mapper
 				if (prop.CanWrite && sourcePropertiesDict.TryGetValue(sourcePropName, out var sourceProp) && sourceProp.CanRead)
 				{
 					var value = sourceProp.GetValue(source);
+					if (value is null && !prop.PropertyType.IsValueType)
+					{
+						prop.SetValue(target, null);
+					}
 					if (value is not null && prop.PropertyType.IsAssignableFrom(sourceProp.PropertyType))
 					{
 						prop.SetValue(target, value);
-					}
-					else if (value is null && !prop.PropertyType.IsValueType)
-					{
-						prop.SetValue(target, null);
 					}
 				}
 			}
