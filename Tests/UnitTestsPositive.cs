@@ -2,7 +2,7 @@ using ObjectMapper;
 
 namespace Tests;
 
-public class UnitTest1
+public class UnitTestsPositive
 {
     [Fact]
     public void MapCatEntityToCatDto_MapsAllPropertiesCorrectly()
