@@ -23,6 +23,12 @@ public static class Mapper
 		var targetType = typeof(T2);
 		var mapFromAttr = targetType.GetCustomAttribute<MapFromAttribute>()
 			?? throw new InvalidOperationException($"Target type {targetType.Name} must have a MapFrom attribute.");
+		
+		var mapIgnoreAttr = targetType.GetCustomAttribute<MapIgnoreAttribute>();
+		if (mapIgnoreAttr is not null)
+		{
+			throw new InvalidOperationException($"Target type {targetType.Name} is marked with MapIgnoreAttribute, mapping is not allowed.");
+		}
 
 		if (mapFromAttr.SourcePropertyName != source.GetType().Name)
 		{
@@ -56,6 +62,14 @@ public static class Mapper
 
 		foreach (var prop in targetProperties)
 		{
+			// Check for MapIgnoreAttribute
+			var mapIgnoreAttr = prop.GetCustomAttribute<MapIgnoreAttribute>();
+			if (mapIgnoreAttr is not null)
+			{
+				// If the property is marked with MapIgnoreAttribute, skip mapping for this property
+				continue;
+			}
+			
 			// Check for MapFromUsingAttribute
 			var mapFromUsingAttr = prop.GetCustomAttribute<MapFromUsingAttribute>();
 			if (mapFromUsingAttr is not null)

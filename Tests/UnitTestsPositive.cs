@@ -83,4 +83,17 @@ public class UnitTestsPositive
         Assert.Equal(catEntity1.Food.FoodType, catDto.Snack.FoodType);
         Assert.Equal(catEntity1.Food.Quantity, catDto.Snack.Quantity);
 	}
+    
+    [Fact]
+    public void MapCatEntityToCatDtoWithMapIgnore_IgnoresProperty()
+    {
+        var catEntity1 = new CatEntity(1, "Whiskers", "Siamese", new DateTime(2020, 1, 1), "Brown", true);
+
+        var catDto = Mapper.Map<CatEntity, CatDtoWithMapIgnore>(catEntity1);
+        Assert.NotNull(catDto);
+        Assert.IsType<CatDtoWithMapIgnore>(catDto);
+        Assert.Equal(catEntity1.Id, catDto.Id);
+        Assert.Equal(catEntity1.Name, catDto.Name);
+        Assert.Null(catDto.Food);
+    }
 }

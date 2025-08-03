@@ -1,6 +1,14 @@
 namespace ObjectMapper.Attributes
 {
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
+    /// <summary>
+    /// Maps a property or class from a source property using a specified converter method.
+    /// The converter method must be static and belong to the specified converter type.
+    /// The source property name is used to identify the property in the source object that should be
+    /// used for mapping.
+    /// The converter method will be called with the value of the source property to convert it to
+    /// the target property type.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Class)]
     public class MapFromUsingAttribute : Attribute
     {
         public string SourcePropertyName { get; }
