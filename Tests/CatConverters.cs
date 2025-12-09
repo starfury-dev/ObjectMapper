@@ -2,17 +2,17 @@
 
 public static class CatConverters
 {
-    public static int ConvertToAge(DateTime birthDate)
-    {
-        return DateTime.Today.Year - birthDate.Year;
-    }
+	public static int ConvertToAge(CatEntity catEntity)
+	{
+		return DateTime.Today.Year - catEntity.BirthDate.Year;
+	}
 
-    public static CatFood ConvertToCatFood(CatFood catfood)
+	public static CatFood ConvertToCatFood(CatEntity catEntity)
     {
         return new CatFood
         {
-            FoodType = catfood.FoodType,
-            Quantity = catfood.Quantity
+            FoodType = catEntity.Food.FoodType,
+            Quantity = catEntity.Food.Quantity
         };
 	}
 }

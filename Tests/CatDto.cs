@@ -20,9 +20,9 @@ public class CatDto
     [MapFrom(nameof(CatEntity.Teeth))]
     public int NoofTeeth { get; set; }
 
-    [MapFromUsing(typeof(CatConverters), nameof(CatConverters.ConvertToAge), nameof(CatEntity.BirthDate))]
+    [MapFromUsing(typeof(CatConverters), nameof(CatConverters.ConvertToAge))]
     public int Age { get; set; }
     
-    [MapFromUsing(typeof(CatConverters), nameof(CatConverters.ConvertToCatFood), nameof(CatEntity.Food))]
+    [MapFromUsing(typeof(CatConverters), nameof(CatConverters.ConvertToCatFood))]
 	public CatFood Snack { get; set; } = default!;
 }

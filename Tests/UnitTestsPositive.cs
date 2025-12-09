@@ -7,8 +7,15 @@ public class UnitTestsPositive
     [Fact]
     public void MapCatEntityToCatDto_MapsAllPropertiesCorrectly()
     {
-        var catEntity1 = new CatEntity(1, "Whiskers", "Siamese", new DateTime(2020, 1, 1), "Brown", true);
-        var catDto = Mapper.Map<CatEntity, CatDto>(catEntity1);
+        var catEntity1 = new CatEntity(1, "Whiskers", "Siamese", new DateTime(2020, 1, 1), "Brown", true)
+		{
+			Food = new CatFood()
+			{
+				FoodType = "Dry",
+				Quantity = 100
+			}
+		};
+		var catDto = Mapper.Map<CatEntity, CatDto>(catEntity1);
 
         Assert.NotNull(catDto);
         Assert.IsType<CatDto>(catDto);
@@ -46,8 +53,13 @@ public class UnitTestsPositive
     {
         var catEntity1 = new CatEntity(1, "Whiskers", "Siamese", new DateTime(2020, 1, 1), "Brown", true)
         {
-            Teeth = 30
-        };
+            Teeth = 30,
+			Food = new CatFood()
+			{
+				FoodType = "Dry",
+				Quantity = 100
+			}
+		};
         var catDto = Mapper.Map<CatEntity, CatDto>(catEntity1);
         Assert.NotNull(catDto);
         Assert.IsType<CatDto>(catDto);
@@ -57,7 +69,14 @@ public class UnitTestsPositive
     [Fact]
     public void MapCatEntityWithBirthDateToCatDto_MapsAgePropertyUsingConverter()
     {
-        var catEntity1 = new CatEntity(1, "Whiskers", "Siamese", new DateTime(2020, 1, 1), "Brown", true);
+        var catEntity1 = new CatEntity(1, "Whiskers", "Siamese", new DateTime(2020, 1, 1), "Brown", true)
+        {
+            Food = new CatFood()
+            {
+                FoodType = "Wet",
+                Quantity = 10
+            }
+        };
         var catDto = Mapper.Map<CatEntity, CatDto>(catEntity1);
         Assert.NotNull(catDto);
         Assert.IsType<CatDto>(catDto);
@@ -96,4 +115,14 @@ public class UnitTestsPositive
         Assert.Equal(catEntity1.Name, catDto.Name);
         Assert.Null(catDto.Food);
     }
+
+    [Fact]
+    public void MapDogEntityToDogDto_MapFromUsing()
+    {
+        var dogEntity = new DogEntity { Name = "Golden Retriever" };
+        var dogDto = Mapper.Map<DogEntity, DogDto>(dogEntity);
+        Assert.NotNull(dogDto);
+        Assert.IsType<DogDto>(dogDto);
+        Assert.Equal("Cool dog Golden Retriever", dogDto.Name);
+	}
 }

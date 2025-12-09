@@ -36,7 +36,6 @@ public static class Mapper
 		}
 
 		var target = MapObject<T1, T2>(source);
-
 		return target;
 	}
 
@@ -74,29 +73,11 @@ public static class Mapper
 			var mapFromUsingAttr = prop.GetCustomAttribute<MapFromUsingAttribute>();
 			if (mapFromUsingAttr is not null)
 			{
-				var sourcePropNameForUsing = mapFromUsingAttr.SourcePropertyName ?? prop.Name;
-				if (prop.CanWrite && sourcePropertiesDict.TryGetValue(sourcePropNameForUsing, out var sourcePropForUsing) && sourcePropForUsing.CanRead)
+				var converterMethod = mapFromUsingAttr.ConverterType.GetMethod(mapFromUsingAttr.ConverterMethodName ?? Constants.DefaultConvertMethodName, BindingFlags.Public | BindingFlags.Static);
+				if (converterMethod is not null)
 				{
-					var value = sourcePropForUsing.GetValue(source);
-					if (value is null)
-					{
-						prop.SetValue(target, null);
-						continue;
-					}
-					var converterMethod = mapFromUsingAttr.ConverterType.GetMethod(mapFromUsingAttr.ConverterMethodName, BindingFlags.Public | BindingFlags.Static);
-					if (converterMethod is not null)
-					{
-						var parameters = converterMethod.GetParameters();
-						if (parameters.Length == 1 && parameters[0].ParameterType.IsAssignableFrom(sourcePropForUsing.PropertyType))
-						{
-							var convertedValue = converterMethod.Invoke(null, [value]);
-							prop.SetValue(target, convertedValue);
-						}
-						else
-						{
-							throw new InvalidOperationException($"Converter method '{mapFromUsingAttr.ConverterMethodName}' in '{mapFromUsingAttr.ConverterType.Name}' must accept a single parameter of type '{sourcePropForUsing.PropertyType.Name}'.");
-						}
-					}
+					var convertedValue = converterMethod.Invoke(null, [source]);
+					prop.SetValue(target, convertedValue);
 				}
 				continue;
 			}
