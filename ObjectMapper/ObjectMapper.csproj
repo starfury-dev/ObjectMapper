@@ -5,10 +5,17 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <PackageId>starfury-dev</PackageId>
-    <Title>ObjectMapper</Title>
+    <PackageId>StarFuryDev.ObjectMapper</PackageId>
+    <Title>Object Mapper</Title>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/starfury-dev/ObjectMapper-</RepositoryUrl>
+	<Authors>Iresha Madhujith Nanayakkara</Authors>
+	<Description>A simple and lightweight attribute based object mapping library for .NET</Description>
+	<PackageTags>mapper;object-mapper;mapping;dotnet</PackageTags>
+	<PackageProjectUrl>https://github.com/starfury-dev/ObjectMapper</PackageProjectUrl>
+	<RepositoryUrl>https://github.com/starfury-dev/ObjectMapper</RepositoryUrl>
+	<RepositoryType>git</RepositoryType>
+	<PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
