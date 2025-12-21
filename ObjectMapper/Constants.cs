@@ -1,4 +1,4 @@
-﻿namespace ObjectMapper;
+﻿namespace StarFuryDev.ObjectMapper;
 
 public sealed class Constants
 {

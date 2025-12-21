@@ -1,7 +1,7 @@
-﻿using System.Reflection;
-using ObjectMapper.Attributes;
+﻿using StarFuryDev.ObjectMapper.Attributes;
+using System.Reflection;
 
-namespace ObjectMapper;
+namespace StarFuryDev.ObjectMapper;
 
 public static class Mapper
 {
@@ -13,7 +13,7 @@ public static class Mapper
 	/// <typeparam name="T2">Target type</typeparam>
 	/// <param name="source">Source object</param>
 	/// <returns>Mapped target object</returns>
-    public static T2 Map<T1, T2>(T1 source) where T2 : class, new()
+	public static T2 Map<T1, T2>(T1 source) where T2 : class, new()
 	{
 		if (source is null)
 		{
@@ -23,7 +23,7 @@ public static class Mapper
 		var targetType = typeof(T2);
 		var mapFromAttr = targetType.GetCustomAttribute<MapFromAttribute>()
 			?? throw new InvalidOperationException($"Target type {targetType.Name} must have a MapFrom attribute.");
-		
+
 		var mapIgnoreAttr = targetType.GetCustomAttribute<MapIgnoreAttribute>();
 		if (mapIgnoreAttr is not null)
 		{
@@ -59,73 +59,85 @@ public static class Mapper
 
 		var sourcePropertiesDict = sourceProperties.ToDictionary(p => p.Name);
 
-		foreach (var prop in targetProperties)
+		foreach (var targetProp in targetProperties)
 		{
+			if (!targetProp.CanWrite)
+				continue;
+
 			// Check for MapIgnoreAttribute
-			var mapIgnoreAttr = prop.GetCustomAttribute<MapIgnoreAttribute>();
+			var mapIgnoreAttr = targetProp.GetCustomAttribute<MapIgnoreAttribute>();
 			if (mapIgnoreAttr is not null)
 			{
 				// If the property is marked with MapIgnoreAttribute, skip mapping for this property
 				continue;
 			}
-			
+
 			// Check for MapFromUsingAttribute
-			var mapFromUsingAttr = prop.GetCustomAttribute<MapFromUsingAttribute>();
+			var mapFromUsingAttr = targetProp.GetCustomAttribute<MapFromUsingAttribute>();
 			if (mapFromUsingAttr is not null)
 			{
 				var converterMethod = mapFromUsingAttr.ConverterType.GetMethod(mapFromUsingAttr.ConverterMethodName ?? Constants.DefaultConvertMethodName, BindingFlags.Public | BindingFlags.Static);
 				if (converterMethod is not null)
 				{
 					var convertedValue = converterMethod.Invoke(null, [source]);
-					prop.SetValue(target, convertedValue);
+					targetProp.SetValue(target, convertedValue);
 				}
 				continue;
 			}
 
 			// Check for MapFromAttribute
-			var mapFromAttr = prop.GetCustomAttribute<MapFromAttribute>();
+			var mapFromAttr = targetProp.GetCustomAttribute<MapFromAttribute>();
 
 			// Create source prop name based on MapFromAttribute or default to property name
-			var sourcePropName = mapFromAttr?.SourcePropertyName ?? prop.Name;
+			var sourcePropName = mapFromAttr?.SourcePropertyName ?? targetProp.Name;
+			if (!(sourcePropertiesDict.TryGetValue(sourcePropName, out var sourceObjectProp) && sourceObjectProp.CanRead))
+				continue;
 
-			// Check if prop is a class (excluding string and value types)
-			if (prop.PropertyType.IsClass && prop.PropertyType != typeof(string))
+			var sourceValue = sourceObjectProp.GetValue(source);
+			if (sourceValue is null)
+				continue;
+
+			// check if prop is a List<> or Dictionary<,>
+			if (targetProp.PropertyType.IsGenericType)
 			{
-				if (prop.CanWrite && sourcePropertiesDict.TryGetValue(sourcePropName, out var sourceObjectProp) && sourceObjectProp.CanRead)
+				Type genericTypeDef = targetProp.PropertyType.GetGenericTypeDefinition();
+				Type[] genericArgs = targetProp.PropertyType.GetGenericArguments();
+				if (genericTypeDef == typeof(List<>))
 				{
-					var sourceValue = sourceObjectProp.GetValue(source);
-					if (sourceValue is not null)
-					{
-						// Use MakeGenericMethod to call MapObject with correct types
-						var mapObjectMethod = typeof(Mapper).GetMethod("MapObject", BindingFlags.NonPublic | BindingFlags.Static);
-						if (mapObjectMethod is not null)
-						{
-							var genericMapObject = mapObjectMethod.MakeGenericMethod(sourceObjectProp.PropertyType, prop.PropertyType);
-							var convertedObject = genericMapObject.Invoke(null, [sourceValue]);
-							prop.SetValue(target, convertedObject);
-						}
-					}
-					else
-					{
-						prop.SetValue(target, null);
-					}
+					Type itemType = genericArgs[0];
+					Type listType = typeof(List<>).MakeGenericType(itemType);
+					var copiedList = Activator.CreateInstance(listType, sourceValue);
+					targetProp.SetValue(target, copiedList);
+				}
+				else if (genericTypeDef == typeof(Dictionary<,>))
+				{
+					Type keyType = genericArgs[0];
+					Type valueType = genericArgs[1];
+					Type dictType = typeof(Dictionary<,>).MakeGenericType(keyType, valueType);
+					var copiedDict = Activator.CreateInstance(dictType, sourceValue);
+					targetProp.SetValue(target, copiedDict);
+				}
+				continue;
+			}
+			// Check if prop is a class (excluding string and value types)
+			else if (targetProp.PropertyType.IsClass && targetProp.PropertyType != typeof(string))
+			{
+				// Use MakeGenericMethod to call MapObject with correct types
+				var mapObjectMethod = typeof(Mapper).GetMethod("MapObject", BindingFlags.NonPublic | BindingFlags.Static);
+				if (mapObjectMethod is not null)
+				{
+					var genericMapObject = mapObjectMethod.MakeGenericMethod(sourceObjectProp.PropertyType, targetProp.PropertyType);
+					var convertedObject = genericMapObject.Invoke(null, [sourceValue]);
+					targetProp.SetValue(target, convertedObject);
 				}
 				continue;
 			}
 			else
 			{
 				// basic property mapping for primitive types and strings
-				if (prop.CanWrite && sourcePropertiesDict.TryGetValue(sourcePropName, out var sourceProp) && sourceProp.CanRead)
+				if (targetProp.PropertyType.IsAssignableFrom(sourceObjectProp.PropertyType))
 				{
-					var value = sourceProp.GetValue(source);
-					if (value is null && !prop.PropertyType.IsValueType)
-					{
-						prop.SetValue(target, null);
-					}
-					if (value is not null && prop.PropertyType.IsAssignableFrom(sourceProp.PropertyType))
-					{
-						prop.SetValue(target, value);
-					}
+					targetProp.SetValue(target, sourceValue);
 				}
 			}
 		}

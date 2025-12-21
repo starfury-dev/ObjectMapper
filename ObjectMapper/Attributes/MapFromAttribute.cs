@@ -1,4 +1,4 @@
-﻿namespace ObjectMapper.Attributes;
+﻿namespace StarFuryDev.ObjectMapper.Attributes;
 
 /// <summary>
 /// Maps a property or class from a source property.

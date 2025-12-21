@@ -1,4 +1,4 @@
-﻿namespace ObjectMapper.Attributes;
+﻿namespace StarFuryDev.ObjectMapper.Attributes;
 
 /// <summary>
 /// Ignores the property or class during mapping.

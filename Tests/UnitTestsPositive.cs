@@ -1,128 +1,124 @@
-using ObjectMapper;
+using StarFuryDev.ObjectMapper;
 
-namespace Tests;
+namespace StarFuryDev.ObjectMapper.Tests;
 
 public class UnitTestsPositive
 {
-    [Fact]
-    public void MapCatEntityToCatDto_MapsAllPropertiesCorrectly()
-    {
-        var catEntity1 = new CatEntity(1, "Whiskers", "Siamese", new DateTime(2020, 1, 1), "Brown", true)
+	[Fact]
+	public void MapMovieLists_DefaultMapping()
+	{
+		var myMovieCollection = new MyMovieCollection
 		{
-			Food = new CatFood()
-			{
-				FoodType = "Dry",
-				Quantity = 100
-			}
+			Movies = ["The Lord of the Rings", "The Matrix", "Interstellar"]
 		};
-		var catDto = Mapper.Map<CatEntity, CatDto>(catEntity1);
+		var favouriteMovies = Mapper.Map<MyMovieCollection, FavouriteMovies>(myMovieCollection);
+		Assert.NotNull(favouriteMovies);
+		Assert.IsType<FavouriteMovies>(favouriteMovies);
+		Assert.Equal(myMovieCollection.Movies, favouriteMovies.Movies);
 
-        Assert.NotNull(catDto);
-        Assert.IsType<CatDto>(catDto);
-        Assert.Equal(catEntity1.Id, catDto.Id);
-        Assert.Equal(catEntity1.Name, catDto.Name);
-        Assert.Equal(catEntity1.Breed, catDto.Breed);
-        Assert.Equal(catEntity1.BirthDate, catDto.BirthDate);
-        Assert.Equal(catEntity1.Color, catDto.Color);
-        Assert.Equal(catEntity1.IsIndoor, catDto.IsIndoor);
-    }
+	}
 
-    [Fact]
-    public void MapCatEntityWithFoodToCatDto_MapsFoodPropertiesCorrectly()
-    {
-        var catEntity1 = new CatEntity(1, "Whiskers", "Siamese", new DateTime(2020, 1, 1), "Brown", true)
-        {
-            Food = new CatFood()
-            {
-                FoodType = "Dry",
-                Quantity = 100
-            }
-        };
-        var catDto = Mapper.Map<CatEntity, CatDto>(catEntity1);
-
-        Assert.NotNull(catDto);
-        Assert.IsType<CatDto>(catDto);
-        Assert.Equal(catEntity1.Id, catDto.Id);
-        Assert.NotNull(catDto.Food);
-        Assert.Equal(catEntity1.Food.FoodType, catDto.Food.FoodType);
-        Assert.Equal(catEntity1.Food.Quantity, catDto.Food.Quantity);
-    }
-
-    [Fact]
-    public void MapCatEntityWithTeethToCatDto_MapsTeethPropertyCorrectly()
-    {
-        var catEntity1 = new CatEntity(1, "Whiskers", "Siamese", new DateTime(2020, 1, 1), "Brown", true)
-        {
-            Teeth = 30,
-			Food = new CatFood()
-			{
-				FoodType = "Dry",
-				Quantity = 100
-			}
-		};
-        var catDto = Mapper.Map<CatEntity, CatDto>(catEntity1);
-        Assert.NotNull(catDto);
-        Assert.IsType<CatDto>(catDto);
-        Assert.Equal(catEntity1.Teeth, catDto.NoofTeeth);
-    }
-
-    [Fact]
-    public void MapCatEntityWithBirthDateToCatDto_MapsAgePropertyUsingConverter()
-    {
-        var catEntity1 = new CatEntity(1, "Whiskers", "Siamese", new DateTime(2020, 1, 1), "Brown", true)
-        {
-            Food = new CatFood()
-            {
-                FoodType = "Wet",
-                Quantity = 10
-            }
-        };
-        var catDto = Mapper.Map<CatEntity, CatDto>(catEntity1);
-        Assert.NotNull(catDto);
-        Assert.IsType<CatDto>(catDto);
-        Assert.Equal(DateTime.Now.Year - catEntity1.BirthDate.Year, catDto.Age);
-    }
-
-    [Fact]
-    public void MapCatEntityWithFoodToCatDto_MapsSnackPropertyUsingConverter()
-    {
-		var catEntity1 = new CatEntity(1, "Whiskers", "Siamese", new DateTime(2020, 1, 1), "Brown", true)
+	[Fact]
+	public void MapMoviesDictionary_DefaultMapping()
+	{
+		var myMovieCollection = new MyMovieCollection
 		{
-			Food = new CatFood()
+			MoviesDictionary = new Dictionary<int, string>
 			{
-				FoodType = "Wet",
-				Quantity = 10
+				{ 1, "The Lord of the Rings" },
+				{ 2, "The Matrix" },
+				{ 3, "Interstellar" }
 			}
 		};
-
-		var catDto = Mapper.Map<CatEntity, CatDto>(catEntity1);
-        Assert.NotNull(catDto);
-        Assert.IsType<CatDto>(catDto);
-        Assert.NotNull(catDto.Snack);
-        Assert.Equal(catEntity1.Food.FoodType, catDto.Snack.FoodType);
-        Assert.Equal(catEntity1.Food.Quantity, catDto.Snack.Quantity);
+		var favouriteMovies = Mapper.Map<MyMovieCollection, FavouriteMovies>(myMovieCollection);
+		Assert.NotNull(favouriteMovies);
+		Assert.IsType<FavouriteMovies>(favouriteMovies);
+		Assert.Equal(myMovieCollection.MoviesDictionary, favouriteMovies.MoviesDictionary);
 	}
-    
-    [Fact]
-    public void MapCatEntityToCatDtoWithMapIgnore_IgnoresProperty()
-    {
-        var catEntity1 = new CatEntity(1, "Whiskers", "Siamese", new DateTime(2020, 1, 1), "Brown", true);
 
-        var catDto = Mapper.Map<CatEntity, CatDtoWithMapIgnore>(catEntity1);
-        Assert.NotNull(catDto);
-        Assert.IsType<CatDtoWithMapIgnore>(catDto);
-        Assert.Equal(catEntity1.Id, catDto.Id);
-        Assert.Equal(catEntity1.Name, catDto.Name);
-        Assert.Null(catDto.Food);
-    }
+	#region MapDotNetValueTypesWithDefaultMapping
 
-    [Fact]
-    public void MapDogEntityToDogDto_MapFromUsing()
-    {
-        var dogEntity = new DogEntity { Name = "Golden Retriever" };
-        var dogDto = Mapper.Map<DogEntity, DogDto>(dogEntity);
-        Assert.NotNull(dogDto);
-        Assert.IsType<DogDto>(dogDto);
-        Assert.Equal("Cool dog Golden Retriever", dogDto.Name);
+	[Fact]
+	public void MapValueTypes_DefaultMapping()
+	{
+		var source = new ValueTypesSource
+		{
+			BoolProp = true,
+			ByteProp = 1,
+			SByteProp = -1,
+			CharProp = 'A',
+			DecimalProp = 10.5m,
+			DoubleProp = 20.5,
+			FloatProp = 30.5f,
+			IntProp = 100,
+			UIntProp = 200,
+			NintProp = -300,
+			UuintProp = 400,
+			LongProp = -5000,
+			UlongProp = 6000,
+			ShortProp = -700,
+			UshortProp = 800
+		};
+		var destination = Mapper.Map<ValueTypesSource, ValueTypesDestination>(source);
+		Assert.NotNull(destination);
+		Assert.IsType<ValueTypesDestination>(destination);
+		Assert.Equal(source.BoolProp, destination.BoolProp);
+		Assert.Equal(source.ByteProp, destination.ByteProp);
+		Assert.Equal(source.SByteProp, destination.SByteProp);
+		Assert.Equal(source.CharProp, destination.CharProp);
+		Assert.Equal(source.DecimalProp, destination.DecimalProp);
+		Assert.Equal(source.DoubleProp, destination.DoubleProp);
+		Assert.Equal(source.FloatProp, destination.FloatProp);
+		Assert.Equal(source.IntProp, destination.IntProp);
+		Assert.Equal(source.UIntProp, destination.UIntProp);
+		Assert.Equal(source.NintProp, destination.NintProp);
+		Assert.Equal(source.UuintProp, destination.UuintProp);
+		Assert.Equal(source.LongProp, destination.LongProp);
+		Assert.Equal(source.UlongProp, destination.UlongProp);
+		Assert.Equal(source.ShortProp, destination.ShortProp);
+		Assert.Equal(source.UshortProp, destination.UshortProp);
 	}
+
+	#endregion
+
+	#region Test MappingConditions
+
+	[Fact]
+	public void MapSourceWithNoProperties()
+	{
+		var source = new SourceWithNoProperties();
+		var destination = Mapper.Map<SourceWithNoProperties, DestinationForNoProperties>(source);
+		Assert.NotNull(destination);
+		Assert.Null(destination.MyProperty);
+	}
+
+	[Fact]
+	public void MapSourceWithPrivateSetter()
+	{
+		var source = new SourceWithNoProperties();
+		var destination = Mapper.Map<SourceWithNoProperties, DestinationWithReadOnlyProperty>(source);
+		Assert.NotNull(destination);
+		Assert.Equal("ReadOnly", destination.MyProperty);
+	}
+
+	[Fact]
+	public void MapSourceToDestinationWithMapIgnoreAttributeOnProperty()
+	{
+		var source = new SourceForMapIgnore();
+		var destination = Mapper.Map<SourceForMapIgnore, DestinatonWithMapIgnore>(source);
+		Assert.NotNull(destination);
+		Assert.Equal("Original text", destination.MyProperty);
+	}
+
+	[Fact]
+	public void MapSourceToDestinationWithMapUsingAttributeOnProperty()
+	{
+		var source = new Source1() { Text1 = "Earth", Text2 = "Moon" };
+		var destination = Mapper.Map<Source1, Destination1>(source);
+		Assert.NotNull(destination);
+		Assert.Equal($"{source.Text1} - {source.Text2} - from ToText3 method", destination.Text3);
+		Assert.Equal($"{source.Text1} - {source.Text2} - from default convert method", destination.Text4);
+	}
+
+	#endregion
 }
