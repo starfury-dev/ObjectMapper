@@ -85,57 +85,6 @@ var profile = Mapper.Map<Person, Profile>(person);
 - ⚙️ Custom mapping converter support
 - 🎯 Null source properties ignored as default
 
-## Usage Examples
-
-### Basic Mapping
-
-```csharp
-var mapper = new ObjectMapper();
-
-var person = new Person { FirstName = "Jane", LastName = "Doe" };
-var personDto = mapper.Map<Person, PersonDto>(person);
-```
-
-### Custom Property Mapping
-
-```csharp
-mapper.CreateMap<Source, Destination>()
-    .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => $"{src.FirstName} {src.LastName}"))
-    .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => src.Status == "Active"));
-```
-
-### Mapping Collections
-
-```csharp
-var sourceList = new List<Source> 
-{ 
-    new Source { Name = "Alice" },
-    new Source { Name = "Bob" }
-};
-
-var destinationList = mapper.Map<List<Source>, List<Destination>>(sourceList);
-```
-
-### Ignore Properties
-
-```csharp
-mapper.CreateMap<Source, Destination>()
-    .ForMember(dest => dest.InternalId, opt => opt.Ignore());
-```
-
-## Configuration Options
-
-```csharp
-var config = new MapperConfiguration(cfg =>
-{
-    cfg.CaseSensitive = false; // Match properties case-insensitively
-    cfg.AllowNullValues = true; // Allow mapping null values
-    cfg.CreateMap<Source, Destination>();
-});
-
-var mapper = new ObjectMapper(config);
-```
-
 ## Limitations
 
 Since this is a hobby project, there are some limitations:
@@ -156,7 +105,7 @@ No contribution is too small - typo fixes, documentation improvements, and featu
 
 ```bash
 # Clone the repository
-git clone https://github.com/starfury-dev/ObjectMapper-.git
+git clone https://github.com/starfury-dev/ObjectMapper.git
 
 # Restore dependencies
 dotnet restore
@@ -180,7 +129,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Contact
 
-- GitHub: [@yourusername](https://github.com/starfury-dev)
+- GitHub: [@starfury-dev](https://github.com/starfury-dev)
 - Issues: [GitHub Issues](https://github.com/starfury-dev/ObjectMapper/issues)
 
 ---
