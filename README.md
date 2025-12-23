@@ -117,10 +117,6 @@ dotnet build
 dotnet test
 ```
 
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 ## Acknowledgments
 
 - Inspired by other great mapping libraries in the .NET ecosystem
