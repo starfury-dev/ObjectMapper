@@ -3,7 +3,7 @@
 [![NuGet](https://img.shields.io/nuget/v/StarFuryDev.ObjectMapper.svg)](https://www.nuget.org/packages/StarFuryDev.ObjectMapper/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A simple and lightweighta attribute based object mapping library for .NET, built as a hobby project to make object-to-object mapping easier.
+A simple and lightweight attribute based object mapping library for .NET, built as a hobby project to make object-to-object mapping easier.
 
 ## Why This Library?
 
@@ -126,7 +126,6 @@ dotnet test
 ## Contact
 
 - GitHub: [@starfury-dev](https://github.com/starfury-dev)
-- Issues: [GitHub Issues](https://github.com/starfury-dev/ObjectMapper/issues)
 
 ---
 
